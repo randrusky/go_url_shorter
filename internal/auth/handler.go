@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"gourlshorter/v2/configs"
+	"gourlshorter/v2/pkg/req"
 	"gourlshorter/v2/pkg/res"
 	"net/http"
 )
@@ -24,8 +26,11 @@ func NewAuthHandler(router *http.ServeMux, deps AuthHandlerDeps) {
 }
 func (handler *AuthHandler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(handler.Config.Auth.Secret) // Example usage of the config
-		fmt.Println("Login endpoint hit")
+		body, err := req.HandleBody[LoginRequest](&w, r)
+		if  err != nil {
+			return 			
+		}
+		fmt.Println(body)
 		data := LoginResponse{
 			Token: "123",
 		}
@@ -34,6 +39,10 @@ func (handler *AuthHandler) Login() http.HandlerFunc {
 }
 func (handler *AuthHandler) Register() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Register endpoint hit")
+		body, err := req.HandleBody[RegisterRequest](&w, r)
+		if err != nil {
+			return
+		}
+		fmt.Println(body)
 	}
 }
