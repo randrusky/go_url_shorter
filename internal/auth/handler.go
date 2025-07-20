@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 	"gourlshorter/v2/configs"
 	"gourlshorter/v2/pkg/req"

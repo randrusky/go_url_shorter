@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"gourlshorter/v2/configs"
 	"gourlshorter/v2/internal/auth"
+	"gourlshorter/v2/pkg/db"
 	"net/http"
 )
 
 func main() {
 	conf := configs.LoadConfig()
+	_ = db.NewDb(conf)
 	router := http.NewServeMux()
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config: conf,
