@@ -6,6 +6,7 @@ import (
 	"gourlshorter/v2/internal/auth"
 	"gourlshorter/v2/internal/link"
 	"gourlshorter/v2/pkg/db"
+	"gourlshorter/v2/pkg/middleware"
 	"net/http"
 )
 
@@ -23,9 +24,14 @@ func main() {
 		LinkRepository: linkRepository,
 	})
 
+	stack := middleware.Chain(
+		middleware.CORS,
+		middleware.Logging,
+	)
+
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: stack(router),
 	} 
 	fmt.Println("Starting server on :8081")
 	server.ListenAndServe()
