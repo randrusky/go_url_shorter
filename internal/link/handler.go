@@ -1,6 +1,8 @@
 package link
 
 import (
+	"fmt"
+	"gourlshorter/v2/configs"
 	"gourlshorter/v2/pkg/middleware"
 	"gourlshorter/v2/pkg/req"
 	"gourlshorter/v2/pkg/res"
@@ -12,6 +14,7 @@ import (
 
 type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository // Assuming you have a LinkRepository defined
+	Config         *configs.Config // Assuming you have a Config struct for configuration
 }
 
 type LinkHandler struct {
@@ -23,7 +26,7 @@ func NewLinkHandler(router *http.ServeMux, deps LinkHandlerDeps) {
 		LinkRepository: deps.LinkRepository,
 	}
 	router.HandleFunc("POST /link", handler.Create())
-	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update()))
+	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
 	router.HandleFunc("DELETE /link/{id}", handler.Delete())
 	router.HandleFunc("GET /{hash}", handler.GoTo())
 }
@@ -58,6 +61,10 @@ func (handler *LinkHandler) Create() http.HandlerFunc {
 func (handler *LinkHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Implementation for updating a link
+		email, ok := r.Context().Value(middleware.ContextEmailKey).(string)
+		if !ok {
+			fmt.Println(email)
+		}
 		body, err := req.HandleBody[LinkUpdateRequest](&w, r)
 		if err != nil {
 			// Handle error
