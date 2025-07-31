@@ -3,7 +3,7 @@ package link
 import (
 	"fmt"
 	"gourlshorter/v2/configs"
-	"gourlshorter/v2/internal/stat"
+	"gourlshorter/v2/pkg/event"
 	"gourlshorter/v2/pkg/middleware"
 	"gourlshorter/v2/pkg/req"
 	"gourlshorter/v2/pkg/res"
@@ -15,19 +15,19 @@ import (
 
 type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository // Assuming you have a LinkRepository defined
-	StatRepository *stat.StatRepository // Assuming you have a StatRepository defined
 	Config         *configs.Config // Assuming you have a Config struct for configuration
+	EventBus      *event.EventBus // Assuming you have an EventBus for event handling
 }
 
 type LinkHandler struct {
 	LinkRepository *LinkRepository
-	StatRepository *stat.StatRepository
+	EventBus      *event.EventBus
 }
 
 func NewLinkHandler(router *http.ServeMux, deps LinkHandlerDeps) {
 	handler := &LinkHandler{
 		LinkRepository: deps.LinkRepository,
-		StatRepository: deps.StatRepository,
+		EventBus:      deps.EventBus,
 	}
 	router.HandleFunc("POST /link", handler.Create())
 	router.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
@@ -127,7 +127,11 @@ func (handler *LinkHandler) GoTo() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		handler.StatRepository.AddClick(link.ID)
+		// handler.StatRepository.AddClick(link.ID)
+		go handler.EventBus.Publish(event.Event{
+			Type: event.EventLinkVisited,
+			Data: link.ID,
+		})
 		http.Redirect(w, r, link.Url, http.StatusTemporaryRedirect)
 	}
 }
