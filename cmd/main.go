@@ -5,6 +5,7 @@ import (
 	"gourlshorter/v2/configs"
 	"gourlshorter/v2/internal/auth"
 	"gourlshorter/v2/internal/link"
+	"gourlshorter/v2/internal/stat"
 	"gourlshorter/v2/internal/user"
 	"gourlshorter/v2/pkg/db"
 	"gourlshorter/v2/pkg/middleware"
@@ -18,6 +19,8 @@ func main() {
 
 	linkRepository := link.NewLinkRepository(db)
 	userRepository := user.NewUserRepository(db)
+	statRepository := stat.NewStatRepository(db)
+
 	authService := auth.NewAuthService(userRepository)
 	
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
@@ -26,6 +29,7 @@ func main() {
 	})
 	link.NewLinkHandler(router, link.LinkHandlerDeps{
 		LinkRepository: linkRepository,
+		StatRepository: statRepository,
 		Config: conf,		
 	})
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"gourlshorter/v2/internal/link"
+	"gourlshorter/v2/internal/stat"
 	"gourlshorter/v2/internal/user"
 	"os"
 
@@ -19,5 +20,5 @@ func main() {
     if err != nil {
         panic(err)
     }
-	db.AutoMigrate(&link.Link{}, &user.User{})
+	db.AutoMigrate(&link.Link{}, &user.User{}, &stat.Stat{})
 }
